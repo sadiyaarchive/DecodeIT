@@ -27,9 +27,9 @@ In **Figma desktop** (the web app cannot load local plugins): open any design fi
 **Plugins → Development → Import plugin from manifest…** and choose `dist-plugin/manifest.json`.
 Run it from **Plugins → Development → Decode It**. After each rebuild, close and re-run the plugin.
 
-If Figma rejects the placeholder `id` in `plugin/manifest.json`, tell me the exact message and I will adjust it.
+The `id` in `plugin/manifest.json` is a placeholder that is enough for local development. If Figma rejects it, set your own with `DECODEIT_PLUGIN_ID=<id> pnpm run build:plugin` (see [docs/SELF_HOSTING.md](../docs/SELF_HOSTING.md)).
 
-## What to try (and what to tell me)
+## Manual test checklist
 
 | Try | Expect |
 |---|---|
@@ -41,11 +41,11 @@ If Figma rejects the placeholder `id` in `plugin/manifest.json`, tell me the exa
 | Select a very large or very tall frame | A preview still appears, not too slowly |
 | Change the selection while the plugin is open | The preview follows |
 | Edit the frame, then press Refresh | The preview updates |
-| Paste feedback, press **Unpack feedback** | Results appear. The recap shows the frame. With Gemini: the button says *Agree and decode* the first time, then AI-generated readings. In demo mode the wording says demo, not analysed |
+| Paste feedback, press **Decode feedback** | Results appear. The recap shows the frame. With Gemini: the button says *Agree and decode* the first time, then AI-generated readings. In demo mode the wording says demo, not analysed |
 | Change the selection while results are showing | The results do not change |
 | Switch to the **Screenshot** tab, paste an image (Cmd/Ctrl+V) or drop one | Preview, "Added" |
 | Press **Copy summary**, paste elsewhere | The text is copied. If it is not, a message says so (clipboard may be blocked in plugin windows) |
-| Try the keyboard: Tab, Enter, Cmd/Ctrl+Enter, Escape while unpacking | All work |
+| Try the keyboard: Tab, Enter, Cmd/Ctrl+Enter, Escape while decoding | All work |
 | Close and reopen | A fresh form |
 
 ## Development without Figma

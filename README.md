@@ -6,9 +6,9 @@ readings of what the reviewer might mean, specific things to check, and question
 labelled as a guess, never a fact.
 
 <p align="center">
-  <img src="docs/images/compose.png" alt="Decode It plugin with a pricing-page frame selected and feedback typed in" width="300">
+  <img src="assets/screenshots/compose.png" alt="Decode It plugin with a pricing-page frame selected and feedback typed in" width="300">
   &nbsp;&nbsp;
-  <img src="docs/images/result-demo.png" alt="Decode It showing demo-mode readings for the feedback 'make this feel more premium'" width="300">
+  <img src="assets/screenshots/result-demo.png" alt="Decode It showing demo-mode readings for the feedback 'make this feel more premium'" width="300">
 </p>
 <p align="center"><sub>Left: a frame selected in Figma, feedback pasted. Right: the result in demo mode (built-in samples, nothing sent anywhere).</sub></p>
 
@@ -92,7 +92,8 @@ avoid confidential or sensitive information. Details, including what the project
 | `src/` | Plugin UI (React, Tailwind CSS v4); `src/lib/` holds the decoding logic and providers |
 | `worker/` | The Cloudflare Worker that calls Gemini (own `package.json`, tests and README) |
 | `scripts/` | Build script for the plugin and dependency-free check scripts |
-| `docs/` | Self-hosting guide and images |
+| `docs/` | Self-hosting guide |
+| `assets/` | Screenshots used in the README, and `brand/` (reserved for the logo) |
 | `archive/` | Unused artwork kept for reference |
 
 ## Development

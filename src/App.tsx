@@ -289,7 +289,6 @@ function App() {
     setTimeout(() => setCopied((c) => (c === key ? null : c)), 2200);
   };
 
-  const previewUrl = activeSource === 'frame' ? (selection.kind === 'frame' ? selection.previewUrl : null) : (shot?.url ?? null);
   const showSamples = phase === 'compose' || phase === 'error';
   const noMatch = errorInfo?.kind === 'no_match';
 

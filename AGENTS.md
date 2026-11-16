@@ -1,41 +1,29 @@
-# figma-make-app
+# Decode It: notes for contributors and coding agents
 
-React + Vite + Tailwind CSS project running inside Figma Make.
+Decode It is a Figma plugin (React + Vite + Tailwind CSS v4) plus a small Cloudflare Worker that calls Google Gemini.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) first; this file is the quick map.
 
-## Development Server
+## Where things are
 
-A Vite development server is **already running** on `$PORT` (default 8443). You don't need to start it manually.
+- `plugin/code.ts`: Figma plugin code (runs in Figma's sandbox: selection, PNG export, `clientStorage`). `plugin/manifest.json` is the source manifest.
+- `src/`: plugin UI. `src/App.tsx` is the screen; `src/lib/` holds the logic: `decoder.ts` (types, demo provider), `worker-provider.ts` (live provider), `active.ts` (picks one), `worker-url.ts` (`DECODEIT_WORKER_URL`), `run.ts` (timeouts, cancel, error copy), `figma/` (host protocol).
+- `worker/`: Cloudflare Worker (own `package.json`, tests, README). `worker/src/types.ts` + `validate.ts` define the API contract.
+- `scripts/`: `build-plugin.mjs` and dependency-free `check-*.mts` scripts.
+- `docs/SELF_HOSTING.md`, `PRIVACY.md`, `SECURITY.md`: keep them true when behaviour changes.
 
-- Preview URL: The user can access the running app through the preview panel
-- Hot reload: Changes to source files are reflected immediately
+## Commands
 
-## Project Structure
+`pnpm run typecheck`, `pnpm run check`, `pnpm run build`, `pnpm run build:plugin`; Worker: `cd worker && npm run typecheck && npm test`.
 
-This is the canonical project structure. Start with task-relevant files below. Only follow imports or inspect other files when required, when a documented path is missing, or when the repository contradicts this guide.
+## Rules that matter
 
-- `src/main.tsx` - React entrypoint; imports `src/index.css` and mounts `src/App.tsx` into the `#root` element
-- `src/App.tsx` - Primary application component and the usual starting point for UI work
-- `src/index.css` - Global CSS entrypoint and Tailwind CSS v4 import
-- `index.html` - Vite HTML shell containing the `#root` element and loading `src/main.tsx`
-- `package.json` - Project dependencies and the Vite build, development, preview, and formatting scripts
-- `vite.config.ts` - Vite configuration with React, Tailwind CSS v4, and Figma Make plugins plus the `@` alias for `src`
-- `.mise.toml` - Toolchain versions for Node.js and pnpm
+- **No secrets in the client or repo.** The Gemini key is a Worker secret only. No shared tokens in the plugin.
+- **The plugin may contact only the Worker.** `networkAccess` is derived from `DECODEIT_WORKER_URL` by the build; do not hand-edit the built manifest.
+- **Do not weaken Worker validation, origin checks or rate limiting** for convenience. Use `worker/.dev.vars` locally.
+- **Honest output:** readings are guesses; demo output stays labelled as demo.
+- **Privacy changes** need the in-plugin notice, `PRIVACY.md` and the manifest reasoning updated together.
 
-## Dependencies
+## Code style
 
-- Runtime: React 19 and React DOM 19
-- Styling: Tailwind CSS v4 with the `@tailwindcss/vite` plugin
-- Build tooling: Vite 8, TypeScript 5.7, and `@vitejs/plugin-react`
-- Formatting: oxfmt
-
-## Styling
-
-This project uses **Tailwind CSS v4** through the `@tailwindcss/vite` plugin configured in `vite.config.ts`. `src/index.css` imports Tailwind with `@import 'tailwindcss';`. Use Tailwind utility classes directly in JSX and put global CSS or Tailwind v4 theme customization in `src/index.css`. This scaffold does not need a Tailwind config file or PostCSS config.
-
-`src/main.tsx` imports `src/index.css`, so global font wiring belongs in `src/index.css`. Keep CSS `@import` statements first, then add any `@font-face` rules and font-family defaults there.
-
-## Code quality
-
-- Use double quotes for strings containing apostrophes (`"We're here to help"`), or escape them in single-quoted strings. An unescaped apostrophe in a single-quoted string breaks the build.
-- Ensure JSX tags are closed and braces are balanced.
-- Export components as default exports.
+- Tailwind v4 via `@tailwindcss/vite`: no Tailwind or PostCSS config file. Global CSS and font wiring live in `src/index.css`.
+- Use double quotes for strings containing apostrophes. TypeScript is strict.

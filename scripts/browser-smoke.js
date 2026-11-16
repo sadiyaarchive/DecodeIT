@@ -1,7 +1,8 @@
-// Browser interaction test for Unpack. It drives the real UI, so it needs the app open in a browser.
+// Browser interaction test for Decode It. It drives the real UI, so it needs the app open in a browser.
 //
 //   1. Start the dev server:   pnpm run dev
-//   2. Open the app in a browser tab (a plain tab, no ?host= needed) and open the console.
+//   2. Open http://localhost:8443/?provider=demo in a browser tab (demo mode: the checks expect the built-in
+//      scenarios, and live mode would call the real Worker) and open the console.
 //   3. Paste:   const m = await import('/scripts/browser-smoke.js'); await m.run()
 //
 // It uses the two dev-only switches (bottom left of the page): the simulated Figma host, to reach every
@@ -56,7 +57,7 @@ const outcome = async (ms = 9000) => {
   await waitFor(working, 800);
   return waitFor(() => !working(), ms);
 };
-const unpack = async () => {
+const decode = async () => {
   primary().click();
   await outcome();
   await wait(700);
@@ -187,7 +188,7 @@ async function body(state) {
     btn(t).click();
     await wait(120);
     check(`sample "${t}": fills the feedback and collapses the sample section`, feedback().value.length > 0 && !document.querySelector("[aria-label='Sample scenarios']") && !unavailable());
-    await unpack();
+    await decode();
     const art = document.querySelector("article[aria-label='Decoded result']");
     const readings = all('.reading', art);
     check(`sample "${t}": three sections in order`, ['sec-mean', 'sec-try', 'sec-ask'].map((id) => document.getElementById(id)?.textContent).join('|') === "What's behind it|What to try|What to ask");
@@ -204,19 +205,19 @@ async function body(state) {
 
   // ------------------------------------------------------------------ typed feedback
   setFeedback('Make the popup less cluttered');
-  await unpack();
+  await decode();
   check('typed feedback that matches gets that scenario', document.querySelector('.reading-title')?.textContent === 'Reduce visual noise');
   btn('Decode another').click();
   await wait(250);
   setFeedback('Make it feel lighter');
-  await unpack();
+  await decode();
   check('unmatched feedback: neutral "not in the demo" notice, not an error', document.querySelector('.alert')?.innerText.includes('Not in the demo yet') && !document.querySelector('.alert[data-tone=error]') && !resultShown());
   check('unmatched feedback: no generic filler, samples open, text kept, button unavailable', !document.querySelector('.reading') && !!document.querySelector('[aria-label="Sample scenarios"]') && feedback().value === 'Make it feel lighter' && unavailable());
   feedback().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true }));
   await wait(250);
   check('unmatched feedback: the shortcut does not re-run it', !working());
   setFeedback('12345');
-  await unpack();
+  await decode();
   check('digits only: an error that explains itself, with the button unavailable', alertText().includes("Couldn't decode that feedback") && unavailable());
   setFeedback('Simplify this.');
   await wait(100);
@@ -280,7 +281,7 @@ async function body(state) {
   btn('Edit feedback').click();
   await wait(300);
   check('Edit feedback returns to the form with feedback and design kept', feedback().value === 'Simplify this.' && !!document.querySelector('.dc-preview'));
-  await unpack();
+  await decode();
   btn('Decode another').click();
   await wait(300);
   check('Decode another clears the feedback', feedback().value === '');
@@ -310,7 +311,7 @@ async function body(state) {
   await wait(120);
   check('a counter appears near the 1000 character limit', text().includes('850 / 1000') && feedback().maxLength === 1000);
   setFeedback('pop ' + 'a'.repeat(900));
-  await unpack();
+  await decode();
   const shell = document.querySelector('.shell').getBoundingClientRect();
   check('a 900-character unbroken word does not break the layout', !all('.shell *').some((e) => e.getBoundingClientRect().right > shell.right + 1));
   await startOver();
@@ -336,7 +337,7 @@ async function body(state) {
   check('Refresh keeps working', !!document.querySelector('.dc-preview') || !!document.querySelector('.dc.skeleton'));
   await setHost('frame');
   await wait(300);
-  await unpack();
+  await decode();
   check('submitting a frame shows its recap and the honest demo wording', resultShown() && document.querySelector('.known').innerText.includes('Design: Figma frame "Home", 390 × 520') && lower().includes('does not analyse your design'));
   await setHost('none');
   await wait(300);
@@ -346,7 +347,7 @@ async function body(state) {
   setFeedback('Simplify this.');
   await setHost('frame');
   await drop(await png('mine.png'));
-  await unpack();
+  await decode();
   check('a screenshot is used when that route is chosen', document.querySelector('.known').innerText.includes('Design: Screenshot "mine.png"'));
   btn('Decode another').click();
   await wait(250);
@@ -426,7 +427,7 @@ async function body(state) {
   // ------------------------------------------------------------------ reduced motion, accessibility, contrast
   await drop(await png('home.png'));
   setFeedback('Simplify this.');
-  await unpack();
+  await decode();
   let rule = null;
   for (const sheet of document.styleSheets) for (const r of sheet.cssRules) if (r.type === CSSRule.MEDIA_RULE && /prefers-reduced-motion/.test(r.conditionText)) rule = r;
   check('a reduced-motion rule exists', !!rule);

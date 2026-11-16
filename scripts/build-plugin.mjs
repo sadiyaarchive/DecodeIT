@@ -21,7 +21,7 @@ await build({
   publicDir: false,
   logLevel: 'warn',
   build: {
-    lib: { entry: 'plugin/code.ts', formats: ['iife'], name: 'UnpackPlugin', fileName: () => 'code.js' },
+    lib: { entry: 'plugin/code.ts', formats: ['iife'], name: 'DecodeItPlugin', fileName: () => 'code.js' },
     outDir: out,
     emptyOutDir: false,
     minify: false,
