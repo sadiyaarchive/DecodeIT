@@ -1,12 +1,20 @@
 # Brand assets
 
-Reserved for the Decode It logo and related brand files (for example `logo.svg`).
+| File | What it is |
+|---|---|
+| `DecodeIT-logo.svg` | The Decode It logo, added by the project owner exactly as supplied (657 x 427, a gradient speech-bubble cat with a `</>` mark). **Do not edit, recolour or redraw it.** |
 
-This folder is intentionally empty for now. Nothing here has been generated or invented: the project's logo will be
-added by its owner. Until then the plugin UI shows the text title "Decode It" and the dev page has no favicon.
+Where it is used:
 
-When the logo is added:
+- the top of the root [`README.md`](../../README.md)
+- the dev page's favicon, referenced from [`index.html`](../../index.html) at this path (Vite bundles it into `dist/`, so there is a single copy)
 
-- Keep the original vector file here, with a note of its author and licence in this README.
-- Reference it from the root `README.md` (and, if wanted, add a favicon link to `index.html`).
-- Do not use another project's or company's marks in this folder.
+Not used (by design): the Figma plugin panel itself shows the text title "Decode It", and Figma plugin manifests
+take their icon from the Figma Community listing, not from this repository.
+
+Notes for reuse:
+
+- The artwork has a very dark top edge, so on dark backgrounds the ears blend in; place it on a light surface or add padding.
+- The SVG is not square, so browsers letterbox it as a favicon. Replacing it with a square variant is a design decision for the owner.
+- Licence and attribution for the logo are not stated yet. *(Owner decision: state in this file whether the logo is covered by the repository's MIT licence or reserved. See "Remaining decisions" in the cleanup report.)*
+- The unused cat illustrations in [`archive/mascot/`](../../archive/mascot/) are a different, older artwork and must not be confused with this logo.

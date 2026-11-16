@@ -6,7 +6,7 @@
 **Security → Report a vulnerability**. *(Maintainers: enable "Private vulnerability reporting" in the repository's
 Security settings before making the repository public, and add a fallback contact address here.)*
 
-Include what you found, how to reproduce it, and the impact. We aim to acknowledge reports within a few days, and will
+Include what you found, how to reproduce it, and the impact. Reports are handled on a best-effort basis by volunteers. We will
 keep you updated and credit you if you wish. This is a volunteer project and cannot offer a bounty.
 
 ## Scope

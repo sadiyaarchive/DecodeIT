@@ -141,14 +141,17 @@ async function body(state) {
   check('design only: unavailable, asks for the feedback', unavailable() && note() === 'Paste the feedback you received to continue.');
   primary().click();
   await wait(250);
+  // Focus is moved in a requestAnimationFrame. A browser that is not painting (a hidden or unfocused pane) runs
+  // frames late, so give it time to arrive; the check itself is unchanged and still fails if focus never moves.
+  await waitFor(() => document.activeElement === feedback(), 1500);
   check('clicking while the feedback is missing focuses the feedback', document.activeElement === feedback() && !working());
 
   // ------------------------------------------------------------------ screenshot validation
   await startOver();
   await drop(new File(['GIF89a'], 'anim.gif', { type: 'image/gif' }));
   check('a GIF is refused with a reason', alertText().includes("isn't supported") && !document.querySelector('.dc-preview'));
-  await drop(new File([new Uint8Array(11 * 1024 * 1024)], 'huge.png', { type: 'image/png' }));
-  check('an 11 MB image is refused with its size', alertText().includes('11.0 MB') && !document.querySelector('.dc-preview'));
+  await drop(new File([new Uint8Array(5_000_000)], 'huge.png', { type: 'image/png' }));
+  check('a 5 MB image is refused with its size and the 4 MB limit', alertText().includes('5.0 MB') && alertText().includes('4.0 MB') && !document.querySelector('.dc-preview'));
   await drop(new File([new Uint8Array([1, 2, 3, 4])], 'broken.png', { type: 'image/png' }));
   check('a corrupt image is refused', alertText().includes("couldn't be read") && !document.querySelector('.dc-preview'));
   await drop(new File([], 'empty.png', { type: 'image/png' }));
@@ -156,12 +159,12 @@ async function body(state) {
   await drop(await png('tiny.png', 10, 10));
   check('a tiny image is refused', alertText().includes('too small'));
   await drop(await png('first.png'));
-  check('a valid screenshot shows a preview, its name and size, and clears the error', document.querySelector('.dc-preview')?.innerText.includes('first.png · 80 × 60') && !alertText());
+  check('a valid screenshot shows a preview, its name and size, and clears the error', !!document.querySelector('.dc-preview img') && document.querySelector('.dc-meta')?.innerText.includes('first.png · 80 × 60') && !alertText());
   check('design status reads Added', document.querySelector('.field-status[data-state=added]')?.textContent.includes('Added'));
   await pasteImage(await png('second.png'));
-  check('a pasted image replaces it', document.querySelector('.dc-preview')?.innerText.includes('second.png'));
+  check('a pasted image replaces it', document.querySelector('.dc-meta')?.innerText.includes('second.png'));
   await drop(new File(['x'], 'bad.gif', { type: 'image/gif' }));
-  check('a refused replacement keeps the current screenshot', document.querySelector('.dc-preview')?.innerText.includes('second.png'));
+  check('a refused replacement keeps the current screenshot', !!document.querySelector('.dc-preview img') && document.querySelector('.dc-meta')?.innerText.includes('second.png'));
   btn('Remove').click();
   await wait(200);
   check('removing returns to the empty state and the design is required again', !!document.querySelector('.dc-empty') && !document.querySelector('.dc-preview'));
@@ -229,6 +232,7 @@ async function body(state) {
   check('the redundant bottom primary button is hidden during loading', !primary());
   btn('Cancel').click();
   await wait(300);
+  await waitFor(() => document.activeElement === feedback(), 1500); // same rAF note as above
   check('Cancel returns to the form with the feedback kept and focused', !working() && feedback()?.value === 'Simplify this.' && announced().startsWith('Cancelled') && document.activeElement === feedback());
   await wait(1200);
   check('no result appears after cancelling', !resultShown());
@@ -331,7 +335,7 @@ async function body(state) {
   check('Figma, export fails: a clear error with Try again', alertText().includes("Couldn't read that frame") && alertText().includes('no longer available') && unavailable() && note().startsWith('Fix the frame problem'));
   await setHost('slow-frame');
   check('Figma, slow export: a loading state, then the preview', !!document.querySelector('.dc.skeleton') && note() === 'Reading your frame…' && (await waitFor(() => !!document.querySelector('.dc-preview'), 5000)) !== null);
-  check('Figma, frame selected: preview with name and size, design Selected, button available', document.querySelector('.dc-preview')?.innerText.includes('Home · 390 × 520') && document.querySelector('.field-status[data-state=added]')?.textContent.includes('Selected') && !unavailable() && note() === '');
+  check('Figma, frame selected: preview with name and size, design Selected, button available', !!document.querySelector('.dc-preview img') && document.querySelector('.dc-meta')?.innerText.includes('Home · 390 × 520') && document.querySelector('.field-status[data-state=added]')?.textContent.includes('Selected') && !unavailable() && note() === '');
   btn('Refresh the preview').click();
   await wait(300);
   check('Refresh keeps working', !!document.querySelector('.dc-preview') || !!document.querySelector('.dc.skeleton'));

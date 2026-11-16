@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/brand/DecodeIT-logo.svg" alt="Decode It logo" width="140">
+</p>
+
 # Decode It
 
 **Read between the lines of design feedback.** Decode It is a Figma plugin that takes a vague comment like

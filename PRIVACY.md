@@ -4,7 +4,7 @@ This describes what Decode It does with your data. It covers the plugin and the 
 hosted instance the project provides by default. If you run your own Worker (see
 [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md)), that deployment is yours and you are responsible for it.
 
-*This is a plain-language description, not legal advice. Maintainers: complete the "Who runs the hosted instance" section before the repository goes public.*
+*This is a plain-language description, not legal advice. Maintainers: complete the three **TO COMPLETE** items under "The hosted instance" before the repository goes public.*
 
 ## Short version
 
@@ -45,9 +45,9 @@ code when something fails. You can read the code to confirm this.
   metadata (such as URL, status and time) in the Worker's dashboard if observability is enabled, which it is in the
   default configuration. See Cloudflare's privacy policy.
 - **Google (Gemini API)** receives your image, feedback and notes to produce the readings. How Google handles prompts
-  depends on the plan of the API key used. **On Gemini's free tier, Google may use prompts to improve its products, and
-  humans may review them. Paid usage is treated differently.** Check Google's current Gemini API terms for the key you use.
-  The project's hosted instance's key tier is stated in the section below.
+  depends on the plan of the API key used. **On Gemini's free tier, Google may use prompts to improve its products.
+  Paid usage is treated differently.** Check Google's current Gemini API terms for the key you use.
+  Which plan the hosted instance uses is not yet stated (see "The hosted instance" below); until it is, assume the free-tier terms.
 
 ## What stays on your device
 
@@ -67,10 +67,21 @@ treated as facts about what a reviewer meant. Ask the reviewer when it matters.
 - Decline by not pressing **Agree and decode**. The plugin sends nothing until you do.
 - Run your own Worker with your own key to control where your data goes.
 
-## Who runs the hosted instance
+## The hosted instance
 
-*TO COMPLETE before publishing: the name or project identity of the operator, a contact address for privacy requests
-(a project mailbox rather than a personal one), the Gemini key tier in use, and the Worker's observability setting.*
+What the repository itself shows (you can check it in [`worker/wrangler.jsonc`](worker/wrangler.jsonc)):
+
+- Workers observability is **enabled** in the project's Worker configuration (`"observability": { "enabled": true }`). The
+  Worker's own code logs only status codes on failure.
+- The Worker keeps a per-IP rate-limit counter (10 requests per 60 seconds) and no other state.
+
+What this document cannot state until the operator decides it:
+
+- **TO COMPLETE:** the name or project identity of the operator of the hosted instance, and a contact address for privacy
+  requests (a project mailbox rather than a personal one).
+- **TO COMPLETE:** which Gemini API plan (free or paid) the hosted instance's key uses.
+- **TO COMPLETE:** whether the Cloudflare dashboard settings of the deployed Worker match `wrangler.jsonc` (for example
+  observability and log retention), because the dashboard can differ from the file.
 
 ## Changes
 
