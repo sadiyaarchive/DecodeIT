@@ -1,0 +1,36 @@
+import type { DecodeResult } from './decoder.ts';
+
+/** Plain-text version of a result, for pasting into a doc or a reply. Facts and guesses stay separate. */
+export function buildSummary(comment: string, result: DecodeResult): string {
+  const lines: string[] = [];
+  lines.push(`Feedback: “${comment.trim()}”`, '');
+
+  lines.push('What we know');
+  for (const item of result.observed) lines.push(`- ${item}`);
+  lines.push(`(${result.contextUse.note})`);
+  lines.push('');
+
+  lines.push('What it might mean (guesses, not facts)');
+  lines.push(result.summary);
+  result.interpretations.forEach((it, i) => {
+    lines.push('', `${i + 1}. ${it.label}`, `   ${it.meaning}`);
+    lines.push(`   Try first: ${it.tries.join('; ')}`);
+  });
+
+  if (result.assumptions.length) {
+    lines.push('', 'Assumptions behind these readings');
+    for (const a of result.assumptions) lines.push(`- ${a}`);
+  }
+
+  lines.push('', 'Questions to ask');
+  if (result.questions.length) {
+    for (const q of result.questions) lines.push(`- ${q}`);
+  } else {
+    lines.push('- None needed: the feedback is specific enough to act on.');
+  }
+
+  if (result.source.isDemo) {
+    lines.push('', 'Demo output: built-in sample scenario, not an AI model.');
+  }
+  return lines.join('\n');
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Decode It",
+  "id": "1000000000000000001",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["none"],
+    "reasoning": "Decode It runs entirely inside Figma. It makes no network requests and sends nothing anywhere."
+  }
+}
