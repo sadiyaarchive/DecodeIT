@@ -1,0 +1,45 @@
+{
+  "name": "figma-make-app",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Figma plugin that turns vague design feedback into plausible readings and follow-up questions.",
+  "license": "MIT",
+  "packageManager": "pnpm@10.34.3",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sadiyaarchive/DecodeIT.git"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "format": "oxfmt",
+    "check:matching": "node scripts/check-matching.mts",
+    "check:scenarios": "node scripts/check-scenarios.mts",
+    "check:summary": "node scripts/check-summary.mts",
+    "check:states": "node scripts/check-states.mts",
+    "check": "node scripts/check-matching.mts && node scripts/check-scenarios.mts && node scripts/check-summary.mts && node scripts/check-states.mts && node scripts/check-worker-provider.mts && node scripts/check-plugin.mts",
+    "build:plugin": "node scripts/build-plugin.mjs",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p plugin/tsconfig.json",
+    "check:worker-provider": "node scripts/check-worker-provider.mts",
+    "check:plugin": "node scripts/check-plugin.mts"
+  },
+  "dependencies": {
+    "lucide-react": "^1.59.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.142.0",
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "oxfmt": "^0.2.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^8.0.5"
+  }
+}

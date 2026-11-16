@@ -1,0 +1,17 @@
+{
+  "name": "Decode It",
+  "id": "1000000000000000001",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": [
+    "figma"
+  ],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": [
+      "https://decodeit.sadiya-archives.workers.dev"
+    ],
+    "reasoning": "Decode It sends the selected frame image (or an uploaded screenshot), the pasted feedback and any optional notes to its own Cloudflare Worker at decodeit.sadiya-archives.workers.dev, which asks Google Gemini to interpret the feedback. This happens only after the user agrees in the plugin, and only when they press Decode. No other domains are contacted, and the Gemini API key is held by the Worker, never by the plugin."
+  }
+}

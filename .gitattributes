@@ -1,0 +1,9 @@
+# Normalise line endings for text files. Binary assets (fonts, images) are committed as plain
+# files: this project deliberately does not use Git LFS, so a normal `git clone` builds.
+* text=auto
+*.woff2 binary
+*.woff binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary

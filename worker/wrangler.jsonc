@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Forks: change this to a name unique to your Cloudflare account (it becomes part of your workers.dev URL).
+  "name": "decodeit",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": true,
+  "observability": { "enabled": true },
+
+  // Non-secret settings. GEMINI_API_KEY is NOT here: it is a Worker secret
+  // (`wrangler secret put GEMINI_API_KEY`, or the dashboard) and never lives in this file.
+  "vars": {
+    "GEMINI_MODEL": "gemini-3.5-flash-lite",
+    // Comma-separated. Figma plugin UIs send `Origin: null`, so "null" must stay in the list.
+    "ALLOWED_ORIGINS": "null",
+    "MAX_IMAGE_BYTES": "4000000"
+  },
+
+  // Per-IP throttle (Workers Rate Limiting binding). The code skips it if the binding is absent.
+  "ratelimits": [
+    { "name": "RATE_LIMITER", "namespace_id": "1001", "simple": { "limit": 10, "period": 60 } }
+  ]
+}

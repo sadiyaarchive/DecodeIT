@@ -1,0 +1,2 @@
+# Copy to .dev.vars for `wrangler dev` only. .dev.vars is git-ignored. Never commit a real key.
+GEMINI_API_KEY=your-key-from-aistudio

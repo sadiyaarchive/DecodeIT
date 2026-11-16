@@ -1,0 +1,66 @@
+name: CI
+
+# Runs on pull requests and on pushes to main. It uses NO secrets and never deploys.
+# Do not switch this to `pull_request_target`: that would run fork code with repository secrets.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app:
+    name: Plugin and UI
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run typecheck
+      - run: pnpm run check
+      - run: pnpm run build
+      - run: pnpm run build:plugin
+      - name: Built plugin must not contain secrets or a wrong domain
+        run: |
+          set -eu
+          if grep -rEIl 'AIza[0-9A-Za-z_-]{20,}|GEMINI_API_KEY|x-goog-api-key' dist-plugin; then
+            echo "A key or key name was found in the plugin bundle" >&2; exit 1
+          fi
+          node -e "const m=require('./dist-plugin/manifest.json');const d=m.networkAccess.allowedDomains;if(d.length!==1||!/^https:\/\/[^*\/]+$/.test(d[0]))throw new Error('unexpected allowedDomains: '+JSON.stringify(d));console.log('allowedDomains:',d[0])"
+
+  worker:
+    name: Worker
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: worker
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: worker/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - name: Bundle check (dry run, no deploy, no credentials)
+        run: npx wrangler deploy --dry-run --outdir dist

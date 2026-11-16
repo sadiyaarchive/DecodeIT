@@ -1,0 +1,10 @@
+{
+  "description": "Helps designers turn vague feedback on selected designs into actionable suggestions and follow-up questions, with image upload and sample scenarios.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

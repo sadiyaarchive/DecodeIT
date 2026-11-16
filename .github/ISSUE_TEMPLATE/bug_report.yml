@@ -1,0 +1,41 @@
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **Do not paste API keys, confidential designs or private feedback.** For security problems, use the private security report link instead of this form.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode
+      options:
+        - Live (hosted Worker)
+        - Live (my own Worker)
+        - Demo mode
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Error message or console output
+      description: The text shown in the plugin, or from Figma's console (Plugins → Development → Open console). Remove anything private.
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: e.g. main at 1a2b3c4
+  - type: input
+    id: figma
+    attributes:
+      label: Figma Desktop version and OS
