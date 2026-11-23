@@ -23,7 +23,8 @@
     "build:plugin": "node scripts/build-plugin.mjs",
     "typecheck": "tsc --noEmit && tsc --noEmit -p plugin/tsconfig.json",
     "check:worker-provider": "node scripts/check-worker-provider.mts",
-    "check:plugin": "node scripts/check-plugin.mts"
+    "check:plugin": "node scripts/check-plugin.mts",
+    "check:bundle": "node scripts/check-built-plugin.mts"
   },
   "dependencies": {
     "lucide-react": "^1.59.0",

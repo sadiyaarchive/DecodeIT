@@ -4,10 +4,7 @@
 import { build } from 'vite';
 import fs from 'node:fs';
 import path from 'node:path';
-import { networkAccessFor, resolveWorkerUrl } from '../src/lib/worker-url.ts';
-
-// Validate before building anything: a bad DECODEIT_WORKER_URL should fail fast.
-const worker = resolveWorkerUrl(process.env.DECODEIT_WORKER_URL);
+import { officialNetworkAccess, OFFICIAL_WORKER_URL } from '../src/lib/worker-url.ts';
 
 const out = 'dist-plugin';
 process.env.NODE_ENV = 'production';
@@ -52,13 +49,12 @@ fs.writeFileSync(path.join(out, 'ui.html'), html);
 fs.rmSync(ui, { recursive: true, force: true });
 
 // 3. The manifest.
-// networkAccess is derived from the Worker URL, so the manifest can never allow a different domain than
-// the UI talks to. DECODEIT_PLUGIN_ID optionally replaces the placeholder plugin id (for your own fork).
+// Both the manifest and live provider use the official endpoint.
+// Preserve the source plugin ID until Community publishing.
 const manifest = JSON.parse(fs.readFileSync('plugin/manifest.json', 'utf8'));
-manifest.networkAccess = networkAccessFor(worker);
-if (process.env.DECODEIT_PLUGIN_ID) manifest.id = process.env.DECODEIT_PLUGIN_ID.trim();
+manifest.networkAccess = officialNetworkAccess();
 fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
-console.log(`Worker: ${worker.url}${worker.local ? ' (local development build)' : ''}`);
+console.log(`Worker: ${OFFICIAL_WORKER_URL}`);
 
 const kb = (f) => `${(fs.statSync(path.join(out, f)).size / 1024).toFixed(1)} KB`;
 console.log(`dist-plugin/manifest.json  ${kb('manifest.json')}\ndist-plugin/code.js        ${kb('code.js')}\ndist-plugin/ui.html        ${kb('ui.html')}`);

@@ -1,16 +1,13 @@
-// Build settings for the Figma plugin UI. Separate from vite.config.ts, which carries the Figma
-// Make tooling and is only used for the browser dev server. Run through scripts/build-plugin.mjs.
+// Build settings for the self-contained Figma plugin UI.
+// Run through scripts/build-plugin.mjs; vite.config.ts serves the browser preview.
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
-import { resolveWorkerUrl } from './src/lib/worker-url.ts';
 
 export default defineConfig({
   root: process.cwd(),
   base: './',
   publicDir: false,
   plugins: [react()],
-  // DECODEIT_WORKER_URL picks the Worker; validation failures stop the build.
-  define: { __DECODEIT_WORKER_URL__: JSON.stringify(resolveWorkerUrl(process.env.DECODEIT_WORKER_URL).url) },
   build: {
     outDir: 'dist-plugin/.ui',
     emptyOutDir: true,

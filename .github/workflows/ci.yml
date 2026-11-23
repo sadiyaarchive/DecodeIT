@@ -35,13 +35,12 @@ jobs:
       - run: pnpm run check
       - run: pnpm run build
       - run: pnpm run build:plugin
-      - name: Built plugin must not contain secrets or a wrong domain
-        run: |
-          set -eu
-          if grep -rEIl 'AIza[0-9A-Za-z_-]{20,}|GEMINI_API_KEY|x-goog-api-key' dist-plugin; then
-            echo "A key or key name was found in the plugin bundle" >&2; exit 1
-          fi
-          node -e "const m=require('./dist-plugin/manifest.json');const d=m.networkAccess.allowedDomains;if(d.length!==1||!/^https:\/\/[^*\/]+$/.test(d[0]))throw new Error('unexpected allowedDomains: '+JSON.stringify(d));console.log('allowedDomains:',d[0])"
+        # Obsolete settings must not redirect the official plugin or replace its ID.
+        env:
+          DECODEIT_WORKER_URL: https://override-must-be-ignored.invalid
+          DECODEIT_PLUGIN_ID: override-must-be-ignored
+      - name: Built plugin uses only the official service and contains no secrets
+        run: pnpm run check:bundle
 
   worker:
     name: Worker

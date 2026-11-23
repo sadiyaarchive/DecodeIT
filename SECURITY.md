@@ -28,15 +28,17 @@ engineering, and denial of service by sheer traffic volume against the hosted in
 - The Worker rejects unknown origins, enforces size and shape limits, applies a per-IP rate limit, and re-validates the
   model's JSON before returning it. Feedback and notes are passed to the model as quoted data with an instruction to
   ignore instructions inside them.
-- Logs contain status codes only, never images, feedback, notes or keys.
+- Worker application logs contain upstream status codes or error names, never images, feedback, notes or keys.
+  Cloudflare invocation logs and any Google API logging are separate; confirm their settings before release.
 
 If you ever find a real key in this repository or its history, report it privately at once so it can be revoked.
 
 ## Known limits (please read before reporting)
 
 - **The endpoint is public.** The `Origin: null` allowlist blocks other *websites* from calling the Worker from a browser;
-  it does not stop scripts. Abuse resistance is the per-IP rate limit, request caps, a provider-side spending ceiling
-  and monitoring. See [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md#protecting-your-key-and-your-wallet).
+  it does not stop scripts. Abuse resistance is the per-IP rate limit, request caps, verified provider quotas and spending controls,
+  and monitoring. The rate-limit binding is approximate and the code skips it when missing; production verification
+  is required. See [docs/OPERATIONS.md](docs/OPERATIONS.md).
 - **Prompt injection** cannot be fully prevented. A malicious design image or feedback might steer the model's wording.
   The Worker's output validation limits what can come back (fixed JSON shape, length limits), and the plugin renders it as
   plain text. It has no tools and no access to your other data.
@@ -49,8 +51,8 @@ If you ever find a real key in this repository or its history, report it private
       Worker's secrets).
 - [ ] Never use `pull_request_target` to run code from forks. If a deploy workflow is added: push to `main` only,
       approval-gated Environment, token scoped to the single Worker.
-- [ ] Gemini key in a dedicated Google Cloud project, restricted to the Generative Language API, with low daily quotas.
-      Budgets and alerts notify but do not cap spending; quotas do.
+- [ ] Gemini key in a dedicated Google Cloud project, restricted to the Generative Language API, with verified model-specific quotas
+      and applicable spend controls. Do not treat quotas or delayed billing controls as an exact monetary ceiling.
 - [ ] Rotate the Gemini key before the repository goes public, and after any suspected exposure.
 - [ ] Turn on GitHub secret scanning and push protection, and Dependabot alerts.
 - [ ] Review `.github/` workflows and `wrangler.jsonc` changes with extra care.

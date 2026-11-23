@@ -9,9 +9,9 @@ import { DecodeError } from './decoder.ts';
 import type { DecodeErrorKind, DecodeProvider, DecodeRequest, DecodeResult, DecodeSource, Interpretation } from './decoder.ts';
 import { ACCEPTED_IMAGE_TYPES, formatMb, MAX_IMAGE_BYTES } from './design.ts';
 
-import { DEFAULT_WORKER_URL } from './worker-url.ts';
+import { OFFICIAL_WORKER_URL } from './worker-url.ts';
 
-export { DEFAULT_WORKER_URL };
+export { OFFICIAL_WORKER_URL };
 
 const LIVE_SOURCE: DecodeSource = {
   id: 'gemini',
@@ -79,14 +79,12 @@ function kindForStatus(status: number): DecodeErrorKind {
 }
 
 export interface WorkerProviderOptions {
-  /** Base URL of the Worker, no trailing slash needed. */
-  url: string;
   /** Injected in tests. */
   fetch?: typeof fetch;
 }
 
-export function createWorkerProvider(options: WorkerProviderOptions): DecodeProvider {
-  const base = options.url.replace(/\/+$/, '');
+export function createWorkerProvider(options: WorkerProviderOptions = {}): DecodeProvider {
+  const base = OFFICIAL_WORKER_URL;
   const doFetch = options.fetch ?? ((...a: Parameters<typeof fetch>) => fetch(...a));
 
   return {

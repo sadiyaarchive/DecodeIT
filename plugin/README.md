@@ -6,8 +6,8 @@ things to try and questions to ask.
 **How it works, and what leaves Figma.** When you press *Decode feedback*, the plugin sends the selected frame
 as a PNG (or your uploaded screenshot), the pasted feedback and any optional notes to the Decode It Cloudflare
 Worker (`https://decodeit.sadiya-archives.workers.dev`), which asks Google Gemini to interpret them. This is the
-default, and the only domain the plugin may contact (`networkAccess.allowedDomains` in the built `manifest.json`).
-Set `DECODEIT_WORKER_URL` when building to use your own Worker; the manifest is derived from it. A short notice under the button says
+official service, and the only domain the plugin may contact (`networkAccess.allowedDomains` in the built `manifest.json`).
+The endpoint is fixed; users do not configure a Worker or supply a key. A short notice under the button says
 what is sent, and the first button reads *Agree and decode*: pressing it is the acknowledgement, remembered with
 `figma.clientStorage`. Keyboard shortcuts never skip that first click. The Gemini API key lives only in the
 Worker as a Cloudflare secret and is never in this plugin. Images over 4 MB are rejected before sending.
@@ -27,7 +27,8 @@ In **Figma desktop** (the web app cannot load local plugins): open any design fi
 **Plugins → Development → Import plugin from manifest…** and choose `dist-plugin/manifest.json`.
 Run it from **Plugins → Development → Decode It**. After each rebuild, close and re-run the plugin.
 
-The `id` in `plugin/manifest.json` is a placeholder that is enough for local development. If Figma rejects it, set your own with `DECODEIT_PLUGIN_ID=<id> pnpm run build:plugin` (see [docs/SELF_HOSTING.md](../docs/SELF_HOSTING.md)).
+The current `id` in `plugin/manifest.json` is preserved for local review. Confirm the publishing ID only when
+preparing the Figma Community listing. The build does not override it.
 
 ## Manual test checklist
 
@@ -56,8 +57,12 @@ The `id` in `plugin/manifest.json` is a placeholder that is enough for local dev
 Checks: `pnpm run check` (logic) and `pnpm run typecheck`. Browser interaction test: see the top of
 `scripts/browser-smoke.js`.
 
-### Trying the live provider from the dev server
+### Live integration checks
 
-See [docs/SELF_HOSTING.md](../docs/SELF_HOSTING.md#local-development). In short: run the Worker locally with your own key in
-`worker/.dev.vars`, and set `DECODEIT_WORKER_URL=http://localhost:8787` when running `pnpm dev` or `pnpm run build:plugin`.
-Never widen the production Worker's `ALLOWED_ORIGINS` for this.
+The browser preview uses Demo mode for local testing. The official Worker's origin allowlist remains restricted to
+Figma (`Origin: null`); do not widen it to make the browser preview work. Maintainers can exercise the local Worker
+API separately using [the operations guide](../docs/OPERATIONS.md#local-worker-development).
+
+Before release, perform the manual checklist above in real Figma, including Tab order, first-use consent, focus after
+results/errors, cancellation, clipboard and a non-sensitive live decode. Browser simulations cannot verify Figma's
+sandbox or manifest network restrictions. Record results in the [release checklist](../docs/RELEASE_CHECKLIST.md).

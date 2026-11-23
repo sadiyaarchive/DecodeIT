@@ -3,8 +3,8 @@
 //   node scripts/check-plugin.mts
 import { isPluginToUi, isUiToPlugin, toUint8Array } from '../src/lib/figma/protocol.ts';
 import { classifySelection, isSupportedType, previewScale, typeLabel } from '../src/lib/figma/selection.ts';
-import { DEFAULT_WORKER_URL } from '../src/lib/worker-provider.ts';
-import { networkAccessFor, resolveWorkerUrl } from '../src/lib/worker-url.ts';
+import { OFFICIAL_WORKER_URL } from '../src/lib/worker-provider.ts';
+import { officialNetworkAccess } from '../src/lib/worker-url.ts';
 import { checkImageMeta, describeDesign, MAX_IMAGE_BYTES } from '../src/lib/design.ts';
 import manifest from '../plugin/manifest.json' with { type: 'json' };
 
@@ -71,23 +71,10 @@ check('design description', describeDesign({ kind: 'figma-frame', name: 'Home', 
 // --- manifest ---
 check('manifest: UI and code files named as the build produces them', manifest.main === 'code.js' && manifest.ui === 'ui.html');
 const na = manifest.networkAccess;
-const def = resolveWorkerUrl();
-check('worker url: the default is the hosted https Worker', def.url === DEFAULT_WORKER_URL && DEFAULT_WORKER_URL.startsWith('https://') && !def.local);
-check('manifest: network access is exactly the default Worker, nothing else', JSON.stringify(na.allowedDomains) === JSON.stringify([DEFAULT_WORKER_URL]) && na.devAllowedDomains === undefined);
-check('manifest: the committed networkAccess is what the build derives (run build:plugin to see it)', JSON.stringify(na) === JSON.stringify(networkAccessFor(def)));
+check('worker url: the official endpoint is unchanged', OFFICIAL_WORKER_URL === 'https://decodeit.sadiya-archives.workers.dev');
+check('manifest: exactly the official Worker, with no development domains', JSON.stringify(na.allowedDomains) === JSON.stringify([OFFICIAL_WORKER_URL]) && !('devAllowedDomains' in na));
+check('manifest: committed networkAccess matches the build', JSON.stringify(na) === JSON.stringify(officialNetworkAccess()));
 check('manifest: reasoning discloses the image, feedback, Worker and Gemini', ['image', 'feedback', 'Worker', 'Gemini', 'agrees'].every((w) => na.reasoning.includes(w)));
-check('manifest: reasoning no longer claims there is no network use', !/no network/i.test(na.reasoning));
-
-// --- DECODEIT_WORKER_URL ---
-const throws = (v: string) => { try { resolveWorkerUrl(v); return false; } catch { return true; } };
-const custom = resolveWorkerUrl(' https://my-decodeit.me.workers.dev/ ');
-check('worker url: custom https URL is reduced to its origin', custom.url === 'https://my-decodeit.me.workers.dev' && !custom.local);
-check('worker url: custom URL drives allowedDomains and the reasoning host', JSON.stringify(networkAccessFor(custom).allowedDomains) === '["https://my-decodeit.me.workers.dev"]' && networkAccessFor(custom).reasoning.includes('my-decodeit.me.workers.dev'));
-check('worker url: empty falls back to the default', resolveWorkerUrl('').url === DEFAULT_WORKER_URL && resolveWorkerUrl(undefined).url === DEFAULT_WORKER_URL);
-check('worker url: http is refused for remote hosts', throws('http://example.com'));
-check('worker url: paths, queries, credentials and wildcards are refused', throws('https://a.example.com/v1') && throws('https://a.example.com/?x=1') && throws('https://u:p@a.example.com') && throws('https://*.example.com') && throws('not a url'));
-const local = resolveWorkerUrl('http://localhost:8787');
-check('worker url: localhost http is a dev-only build (devAllowedDomains, none in production)', local.local && JSON.stringify(networkAccessFor(local).allowedDomains) === '["none"]' && JSON.stringify(networkAccessFor(local).devAllowedDomains) === '["http://localhost:8787"]');
 check('manifest: Figma design files only', JSON.stringify(manifest.editorType) === '["figma"]');
 check('manifest: current page access model', manifest.documentAccess === 'dynamic-page');
 

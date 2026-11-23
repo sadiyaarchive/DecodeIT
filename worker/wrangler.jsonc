@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  // Forks: change this to a name unique to your Cloudflare account (it becomes part of your workers.dev URL).
+  // Official hosted Worker. Keep this name and the existing workers.dev endpoint.
   "name": "decodeit",
   "main": "src/index.ts",
   "compatibility_date": "2026-11-01",

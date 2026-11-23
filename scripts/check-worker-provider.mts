@@ -3,7 +3,7 @@
 import { DecodeError } from '../src/lib/decoder.ts';
 import type { DecodeRequest } from '../src/lib/decoder.ts';
 import { runDecode, describeError } from '../src/lib/run.ts';
-import { assertImageAllowed, blobToBase64, createWorkerProvider, DEFAULT_WORKER_URL } from '../src/lib/worker-provider.ts';
+import { assertImageAllowed, blobToBase64, createWorkerProvider, OFFICIAL_WORKER_URL } from '../src/lib/worker-provider.ts';
 
 const failures: string[] = [];
 const check = (name: string, ok: boolean) => ok || failures.push(name);
@@ -24,20 +24,20 @@ const GOOD = {
 };
 const reply = (status: number, body: unknown): Response => new Response(typeof body === 'string' ? body : JSON.stringify(body), { status });
 const fast = { minMs: 0, slowAfterMs: 10_000, timeoutMs: 10_000 };
-const run = (fetchImpl: typeof fetch, r = req()) => runDecode({ provider: createWorkerProvider({ url: 'https://w.test/', fetch: fetchImpl }), request: r, ...fast });
+const run = (fetchImpl: typeof fetch, r = req()) => runDecode({ provider: createWorkerProvider({ fetch: fetchImpl }), request: r, ...fast });
 
 // request contract
 let seen: { url: string; init: RequestInit } | undefined;
 let o = await run(async (url, init) => ((seen = { url: String(url), init: init! }), reply(200, GOOD)));
 const sent = JSON.parse(String(seen?.init.body));
-check('posts to /v1/decode without a double slash', seen?.url === 'https://w.test/v1/decode');
+check('posts only to the official Worker decode endpoint', seen?.url === `${OFFICIAL_WORKER_URL}/v1/decode`);
 check('method POST with JSON content type', seen?.init.method === 'POST' && (seen.init.headers as Record<string, string>)['content-type'] === 'application/json');
 check('no api key or auth header is sent', !JSON.stringify(seen?.init.headers).toLowerCase().match(/key|authorization/));
 check('body has comment, design, context', sent.comment.startsWith('Can we') && sent.design.kind === 'figma-frame' && sent.design.name === 'Home' && sent.design.width === 390 && sent.context.layerSummary === '');
 check('image is base64 with no data: prefix', sent.design.imageBase64 === Buffer.from(new Uint8Array(8).fill(7)).toString('base64') && !sent.design.imageBase64.startsWith('data:'));
 check('mimeType comes from the blob', sent.design.mimeType === 'image/png');
 check('notes are trimmed', sent.context.description === 'Pricing page' && sent.context.goal === 'Start a trial');
-check('the production Worker URL is https', DEFAULT_WORKER_URL.startsWith('https://'));
+check('the production Worker URL is https', OFFICIAL_WORKER_URL.startsWith('https://'));
 
 // response mapping
 if (o.status !== 'ok') failures.push('success maps to ok');
@@ -92,7 +92,7 @@ check('large blobs encode without overflowing', (await blobToBase64(png(3_000_00
 const ac = new AbortController();
 let gotSignal: AbortSignal | undefined;
 const pending = runDecode({
-  provider: createWorkerProvider({ url: 'https://w.test', fetch: (_u, init) => ((gotSignal = init?.signal ?? undefined), new Promise<Response>((_, rej) => init?.signal?.addEventListener('abort', () => rej(new DOMException('Aborted', 'AbortError'))))) }),
+  provider: createWorkerProvider({ fetch: (_u, init) => ((gotSignal = init?.signal ?? undefined), new Promise<Response>((_, rej) => init?.signal?.addEventListener('abort', () => rej(new DOMException('Aborted', 'AbortError'))))) }),
   request: req(), signal: ac.signal, ...fast,
 });
 await new Promise((r) => setTimeout(r, 20));

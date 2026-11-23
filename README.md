@@ -16,114 +16,57 @@ labelled as a guess, never a fact.
 </p>
 <p align="center"><sub>Left: a frame selected in Figma, feedback pasted. Right: the result in demo mode (built-in samples, nothing sent anywhere).</sub></p>
 
-## Features
+## Install in Figma
 
-- Reads the **selected Figma frame** (or an uploaded or pasted screenshot) together with the feedback.
-- Two or three **possible readings**, each with what to look for, concrete things to try, and why.
-- **Questions to ask** the reviewer, only when the feedback is genuinely ambiguous.
-- **Honest labelling**: guesses are marked as guesses, and the result says what was and was not used.
-- **Demo mode**: built-in sample scenarios that work offline and send nothing anywhere.
-- **Self-hostable**: the AI part is a ~300-line Cloudflare Worker you can run with your own Gemini key.
-- Accessible by default: keyboard operable, screen-reader announcements, reduced-motion friendly.
+**Community release is being prepared; there is no published installation link yet.** Once published, you will
+install Decode It from Figma Community and run it in a design file. No API key, Cloudflare account, backend setup
+or technical configuration is required to use the official plugin.
 
-## How it works
+For local review before publication, contributors can [build and import the plugin](plugin/README.md#build-and-load-it-in-figma).
+The [release checklist](docs/RELEASE_CHECKLIST.md) tracks what still needs verification before launch.
 
-```
-┌────────────────────────── Figma Desktop ──────────────────────────┐
-│  plugin code (plugin/code.ts)        plugin UI (src/, React)       │
-│  reads selection, exports PNG  ───►  feedback form, results        │
-└───────────────────────────────────────────┬────────────────────────┘
-                                            │ HTTPS POST /v1/decode
-                                            │ image + feedback + notes  (no API key)
-                                            ▼
-                          Cloudflare Worker (worker/)  ── holds GEMINI_API_KEY (secret)
-                          validates input, rate-limits, builds prompt
-                                            │
-                                            ▼
-                                   Google Gemini API
-                          returns structured JSON, re-validated by the Worker
-```
+## Use Decode It
 
-- The **plugin** never contains an API key. It can contact exactly one domain, the Worker, and that domain is written
-  into `manifest.json` from the same setting the UI uses.
-- The **Worker** checks the request (origin, size, shape), applies a per-IP rate limit, asks Gemini for JSON that
-  matches a schema, and sanitises whatever comes back before returning it.
-- **Demo mode** swaps the Worker for hand-written scenarios in `src/lib/scenarios.ts`.
+1. Select a frame in Figma, or add a screenshot in the plugin.
+2. Paste the feedback you want to understand, such as “Make this feel more premium.”
+3. Optionally add what the design is, who it is for and what it should do.
+4. Read the privacy notice and press **Agree and decode** the first time.
+5. Review the possible meanings, things to try and follow-up questions. Use **Copy summary** to take them into your discussion.
 
-## Quick start
+The readings are guesses, not facts about what the reviewer meant. Use them to decide what to check and what to ask.
 
-You need Node.js 22.18 or newer (24 recommended), [pnpm](https://pnpm.io) 10, and **Figma Desktop** (the web app cannot load local plugins).
+## What you get
 
-```bash
-git clone https://github.com/sadiyaarchive/DecodeIT.git
-cd DecodeIT
-pnpm install
-pnpm run build:plugin     # writes dist-plugin/manifest.json, code.js, ui.html
-```
-
-In Figma Desktop: open a design file, then **Plugins → Development → Import plugin from manifest…** and choose
-`dist-plugin/manifest.json`. Run it from **Plugins → Development → Decode It**.
-
-By default the plugin uses the project's hosted Worker. That instance is best effort: it is rate limited and may be
-slow, change or be switched off. **For anything beyond a trial, run your own** (about 10 minutes, free tiers are
-enough): see [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md).
-
-To try it without any AI and without sending anything: open *Testing the plugin? Try sample feedback* in the plugin and
-tick **Demo mode**, or run `pnpm dev` and open `http://localhost:8443/?provider=demo`.
-
-## Using your own Worker
-
-```bash
-DECODEIT_WORKER_URL=https://your-worker.your-subdomain.workers.dev pnpm run build:plugin
-```
-
-`DECODEIT_WORKER_URL` is the one setting. It decides where the UI sends requests and what `networkAccess.allowedDomains`
-the built manifest contains. Unset, the hosted default is used. Full instructions, including how to deploy the Worker
-with your own Gemini key, are in [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md).
+- Two or three possible readings of vague feedback, with concrete improvements to try and why.
+- Useful follow-up questions when the feedback is ambiguous.
+- A clear account of which design and context were used.
+- Keyboard operation, screen-reader announcements and reduced-motion support.
+- **Demo mode** with built-in samples: open *Testing the plugin? Try sample feedback* and tick **Demo mode**.
+  Demo mode uses no AI and sends nothing anywhere.
 
 ## Privacy
 
-In live mode the selected design image, your feedback and any notes are sent to the Worker and on to Google Gemini.
-The plugin tells you this next to the button, and the first press of **Agree and decode** is your acknowledgement. Please
-avoid confidential or sensitive information. Details, including what the project does and does not store, are in
-[PRIVACY.md](PRIVACY.md).
+In live mode, Decode It sends your selected design image, its name and size, feedback and optional notes to the
+official hosted service, which uses Google Gemini to generate suggestions. Sending happens when you press Decode,
+after acknowledging the notice. Avoid confidential or sensitive information.
 
-## Repository layout
+The plugin keeps no feedback or result history. The Worker code does not persist your content; Cloudflare and Google
+have their own processing and logging policies. The hosted service's plan, logging settings and privacy contact still
+need confirmation before public release. Read [PRIVACY.md](PRIVACY.md) for details.
 
-| Path | What it is |
-|---|---|
-| `plugin/` | Figma plugin code (runs in Figma's sandbox) and manifest |
-| `src/` | Plugin UI (React, Tailwind CSS v4); `src/lib/` holds the decoding logic and providers |
-| `worker/` | The Cloudflare Worker that calls Gemini (own `package.json`, tests and README) |
-| `scripts/` | Build script for the plugin and dependency-free check scripts |
-| `docs/` | Self-hosting guide |
-| `assets/` | Screenshots used in the README, and `brand/` (reserved for the logo) |
-| `archive/` | Unused artwork kept for reference |
+The hosted service is shared and rate limited. If it is busy or unavailable, try again later or use Demo mode.
 
-## Development
+## Contribute
 
-```bash
-pnpm dev                # UI in a browser tab, with switches that simulate Figma and failures
-pnpm run typecheck      # app + plugin
-pnpm run check          # logic checks (matching, scenarios, summary, states, worker provider, plugin/manifest)
-pnpm run build          # UI build
-pnpm run build:plugin   # the plugin bundle
+Designers are welcome to suggest clearer wording, share non-sensitive examples of confusing feedback and report
+usability or accessibility issues. Developers can find setup and checks in [CONTRIBUTING.md](CONTRIBUTING.md).
+Please follow the [Code of Conduct](CODE_OF_CONDUCT.md). For vulnerabilities, follow [SECURITY.md](SECURITY.md).
 
-cd worker && npm install && npm run typecheck && npm test
-```
-
-The dev server runs the UI in a plain browser tab, so it cannot reach the production Worker (its CORS allowlist only
-admits Figma's `Origin: null`, and we deliberately do not widen it). Use demo mode there, or run the Worker locally;
-see the local development section of [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md).
-
-## Contributing
-
-Issues and pull requests are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and the
-[Code of Conduct](CODE_OF_CONDUCT.md). To report a vulnerability, follow [SECURITY.md](SECURITY.md) rather than opening
-a public issue.
+For technical details, see the [architecture](docs/ARCHITECTURE.md), [plugin guide](plugin/README.md) and
+[maintainer operations guide](docs/OPERATIONS.md). The plugin runs inside Figma; it needs no separate UI hosting.
 
 ## Licence
 
-[MIT](LICENSE). Third-party components and the bundled Geist font (SIL OFL 1.1) are listed in
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Decode It is independent and not affiliated with Figma, Google or
-Cloudflare.
+The source code is [MIT-licensed](LICENSE). The [logo's licensing decision](assets/brand/README.md) is pending before
+public release. Third-party components and the bundled Geist font (SIL OFL 1.1) are listed in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Decode It is independent and not affiliated with Figma, Google or Cloudflare.

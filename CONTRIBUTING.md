@@ -19,9 +19,9 @@ cd worker && npm install            # Worker (separate package)
 ```
 
 Try changes without any AI or Figma: `pnpm dev`, open `http://localhost:8443/?provider=demo`. The switches at the bottom
-left simulate Figma selection states and failures. To test live behaviour with your own key, follow
-[docs/SELF_HOSTING.md](docs/SELF_HOSTING.md#local-development). Please use your own Gemini key and Worker; do not ask
-for, or use, anyone else's.
+left simulate Figma selection states and failures. No API key is needed for UI work or automated tests.
+Maintainers working on the backend can use the local Worker workflow in
+[docs/OPERATIONS.md](docs/OPERATIONS.md#local-worker-development). The plugin always uses the official hosted endpoint.
 
 ## Checks (all must pass)
 
@@ -30,6 +30,7 @@ pnpm run typecheck
 pnpm run check
 pnpm run build
 pnpm run build:plugin
+pnpm run check:bundle
 cd worker && npm run typecheck && npm test
 ```
 
@@ -44,8 +45,8 @@ CI runs the same on every pull request, without secrets.
 - **Privacy changes need disclosure.** If you change what is sent, where, or what is stored, update the in-plugin notice,
   `PRIVACY.md` and the manifest `reasoning` text in the same pull request, and say so in the description.
 - **Network access.** The plugin may contact only the Worker. Do not add other domains. `networkAccess` is derived from
-  `DECODEIT_WORKER_URL` by the build; do not hand-edit the built manifest.
-- **No new secrets in the client.** No keys, no shared tokens, nothing in `DECODEIT_*` that is not a public URL.
+  `OFFICIAL_WORKER_URL` in `src/lib/worker-url.ts` by the build; do not hand-edit the built manifest.
+- **No new secrets in the client.** No keys, no shared tokens and no custom backend configuration in the plugin.
 - **Do not weaken the Worker's validation, origin checks or rate limiting** to make development easier. Use `.dev.vars`
   locally instead.
 - **Dependencies:** prefer none. New ones must have an open-source licence compatible with MIT; add them to
