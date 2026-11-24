@@ -63,7 +63,8 @@ export default {
     if (!parsed.ok) return fail(400, 'invalid_input', parsed.error, cors);
 
     try {
-      const output = await callGemini(env, parsed.body, AbortSignal.timeout(UPSTREAM_TIMEOUT_MS));
+      const deadline = Date.now() + UPSTREAM_TIMEOUT_MS;
+      const output = await callGemini(env, parsed.body, AbortSignal.timeout(UPSTREAM_TIMEOUT_MS), deadline);
       return json({ ...output, model: env.GEMINI_MODEL }, 200, cors);
     } catch (e) {
       if (e instanceof UpstreamError) {
@@ -72,7 +73,7 @@ export default {
       if (e instanceof DOMException && (e.name === 'TimeoutError' || e.name === 'AbortError')) {
         return fail(504, 'timeout', 'The AI service did not answer in time.', cors);
       }
-      console.error('unexpected', e instanceof Error ? e.name : 'unknown');
+      console.error('unexpected', { category: 'internal' });
       return fail(500, 'internal', 'Unexpected error.', cors);
     }
   },

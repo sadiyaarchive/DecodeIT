@@ -29,6 +29,15 @@ Success (200): `{ summary, interpretations[{label, meaning, issues[], tries[], w
 Errors: `{ error: { code, message } }` with 400 invalid_input, 403 forbidden_origin, 413 too_large, 415, 429 rate_limit,
 502 upstream/bad_output, 504 timeout. The plugin should map these onto its existing `DecodeError` kinds.
 
+Gemini HTTP 503 is retried once after 1–1.25 seconds of jittered backoff. A longer `Retry-After` (seconds or HTTP
+date) is respected if it fits; otherwise the upstream error is returned without retrying early. Both attempts and
+the delay share the existing 25-second deadline. Other HTTP errors, network failures and unusable output are not
+retried. Malformed response JSON, blocked/incomplete output and invalid result shapes return `502 bad_output`.
+
+Failure diagnostics contain only upstream HTTP status when available, attempt number, elapsed milliseconds,
+failure category, and available finish/block reasons. Reasons are restricted to known enum values (unknown values
+are logged as `UNKNOWN`). Error bodies, prompts, images, generated text and secrets are never logged.
+
 ## Model and operations
 
 The repository currently configures `gemini-3.5-flash-lite` in `wrangler.jsonc`. Keep the existing integration;

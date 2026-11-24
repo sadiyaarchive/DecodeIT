@@ -28,7 +28,8 @@ engineering, and denial of service by sheer traffic volume against the hosted in
 - The Worker rejects unknown origins, enforces size and shape limits, applies a per-IP rate limit, and re-validates the
   model's JSON before returning it. Feedback and notes are passed to the model as quoted data with an instruction to
   ignore instructions inside them.
-- Worker application logs contain upstream status codes or error names, never images, feedback, notes or keys.
+- Worker failure logs contain only upstream HTTP status, attempt number, elapsed time, failure category and available
+  finish/block reason codes. Unknown reason values are redacted. Images, feedback, notes, generated text and keys are never logged.
   Cloudflare invocation logs and any Google API logging are separate; confirm their settings before release.
 
 If you ever find a real key in this repository or its history, report it privately at once so it can be revoked.

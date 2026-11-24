@@ -58,8 +58,10 @@ Recheck after the window resets. This verifies that path, not global abuse resis
 
 ## Observability and privacy
 
-The repository enables Workers observability. Application code logs Gemini error status codes or unexpected error
-names, not designs, prompts, results or keys. Platform invocation logs are separate from those application messages.
+The repository enables Workers observability. Application failure logs contain only upstream HTTP status when available,
+attempt number, elapsed time, failure category and available finish/block reason codes. Unknown reason values are replaced
+with `UNKNOWN`; designs, prompts, results and keys are never logged. Gemini HTTP 503 is retried once within the original
+25-second deadline; see [Worker retry handling](../worker/README.md#api). Platform invocation logs are separate from those application messages.
 [Workers Logs](https://developers.cloudflare.com/workers/observability/logs/workers-logs/) can include request/response
 metadata and uncaught exceptions.
 

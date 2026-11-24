@@ -14,8 +14,8 @@ requiring an account, API key or backend configuration from you.
   to the hosted Decode It service, which sends them to Google Gemini. The first live decode asks you to **Agree and decode**;
   later decodes use your saved consent.
 - **Please avoid confidential or sensitive information** in designs, screenshots, feedback and notes.
-- The Worker **does not store** your content, and our code logs error status codes and error names. The services it runs on have their
-  own handling, described below.
+- The Worker **does not store** your content. On failures, our code logs status, attempt, timing and failure-category
+  metadata, plus available finish/block reason codes. The services it runs on have their own handling, described below.
 - **Demo mode** does not send your design, feedback or context to the hosted service or Google Gemini.
 - No analytics, no cookies, no accounts, no advertising.
 
@@ -52,8 +52,10 @@ it only as the key for the rate limiter.
 ## What the Worker does with it
 
 The Worker (`worker/`) validates the request, builds a prompt, calls the Gemini API and returns the result. It keeps no
-database and writes no files. It does not log the image, the feedback or the notes. On failures, application logs contain an upstream status
-code or an error name, not request or response bodies. You can read the code to confirm this.
+database and writes no files. It does not log the image, the feedback or the notes. On failures, application logs contain
+only the upstream HTTP status when available, attempt number, elapsed time, failure category, and available finish/block
+reason codes. Unknown reason values are replaced with `UNKNOWN`; request and response bodies are never logged.
+You can read the code to confirm this.
 
 ## Third parties
 
@@ -91,7 +93,7 @@ treated as facts about what a reviewer meant. Ask the reviewer when it matters.
 What the repository itself shows (you can check it in [`worker/wrangler.jsonc`](worker/wrangler.jsonc)):
 
 - Workers observability is **enabled** in the project's Worker configuration (`"observability": { "enabled": true }`). The
-  Worker's own code logs upstream status codes or error names on failure.
+  Worker's own code logs only the failure metadata described above.
 - The configuration declares a per-IP rate-limit binding (10 requests per 60 seconds). Its deployed binding has not
   been verified. The code skips throttling if that binding is absent; the binding is approximate, not a global cap.
   See [maintainer operations](docs/OPERATIONS.md#rate-limiting).
